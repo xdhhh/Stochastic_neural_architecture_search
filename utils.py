@@ -4,7 +4,8 @@ import torch
 import shutil
 import torchvision.transforms as transforms
 from torch.autograd import Variable
-
+from torch.optim.lr_scheduler import _LRScheduler
+import math
 
 class AvgrageMeter(object):
 
@@ -20,7 +21,7 @@ class AvgrageMeter(object):
     self.sum += val * n
     self.cnt += n
     self.avg = self.sum / self.cnt
-    
+
 def _data_transforms_cifar10(opt):
   CIFAR_MEAN = [0.49139968, 0.48215827, 0.44653124]
   CIFAR_STD = [0.24703233, 0.24348505, 0.26158768]
@@ -75,3 +76,46 @@ def accuracy(output, target, topk=(1,)):
     correct_k = correct[:k].view(-1).float().sum(0)
     res.append(correct_k.mul_(100.0/batch_size))
   return res
+
+class CosineDecayLR(_LRScheduler):
+  def __init__(self, optimizer, T_max, alpha=1e-4,
+               t_mul=2, lr_mul=0.9,
+               last_epoch=-1,
+               warmup_step=300):
+    self.T_max = T_max
+    self.alpha = alpha
+    self.t_mul = t_mul
+    self.lr_mul = lr_mul
+    self.warmup_step = warmup_step
+    self.last_restart_step = 0
+    self.flag = True
+    super(CosineDecayLR, self).__init__(optimizer, last_epoch)
+
+    self.min_lrs = [b_lr * alpha for b_lr in self.base_lrs]
+    self.rise_lrs = [1.0 * (b - m) / self.warmup_step
+                     for (b, m) in zip(self.base_lrs, self.min_lrs)]
+
+  def get_lr(self):
+    T_cur = self.last_epoch - self.last_restart_step
+    assert T_cur >= 0
+    if T_cur <= self.warmup_step and (not self.flag):
+      base_lrs = [min_lr + rise_lr * T_cur
+              for (base_lr, min_lr, rise_lr) in
+                zip(self.base_lrs, self.min_lrs, self.rise_lrs)]
+      if T_cur == self.warmup_step:
+        self.last_restart_step = self.last_epoch
+        self.flag = True
+    else:
+      base_lrs = [self.alpha + (base_lr - self.alpha) *
+            (1 + math.cos(math.pi * self.last_epoch / self.T_max)) / 2
+            for base_lr in self.base_lrs]
+    if T_cur == self.T_max:
+      self.last_restart_step = self.last_epoch
+      self.min_lrs = [b_lr * self.alpha for b_lr in self.base_lrs]
+      self.base_lrs = [b_lr * self.lr_mul for b_lr in self.base_lrs]
+      self.rise_lrs = [1.0 * (b - m) / self.warmup_step
+                     for (b, m) in zip(self.base_lrs, self.min_lrs)]
+      self.T_max = int(self.T_max * self.t_mul)
+      self.flag = False
+
+    return base_lrs
