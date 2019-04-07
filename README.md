@@ -30,10 +30,10 @@ python main_constraint.py (WITH resource contraint)
 
 ## Search Validation Accuracy (without resource constraint)
 <p align="center">
-<img src="./Search_Validation.png"  width="100%">
-</p>
+<img src="./train.png" alt="train" width="40%">
+<img src="./test.png" alt="test" width="40%"></p>
 <p align="center">
-Figure1 : Search Validation Accuracy with different initial softmax temperature
+Figure1 : Search Validation Accuracy
 </p>
 (Note : the model was not fully trained(<==>converged) due to the limited resources (E.g., GPU and TIME!!)
 
@@ -55,5 +55,4 @@ Figure2 : Network Architecture of normal cell (left) and reduction cell (right)
 ## Reference
 https://github.com/quark0/darts/blob/master/README.md 
 
-Since SNAS follows training settings of DARTS, I reused the official pytorch codes of DARTS as a basic framework of this work.
 
