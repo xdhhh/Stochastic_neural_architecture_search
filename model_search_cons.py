@@ -50,7 +50,7 @@ class MixedOp(nn.Module):
   def forward(self, x, Z):
     self.height = x.shape[0]
     self.width = x.shape[1]
-    return sum(z * op(x) for z, op in zip(Z, self._ops)) , sum(a for a in self.COSTS)
+    return sum(z * op(x) for z, op in zip(Z, self._ops)) , sum(z * c for z, c in zip(Z, self.COSTS))
 
 
 
