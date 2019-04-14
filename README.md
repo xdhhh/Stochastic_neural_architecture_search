@@ -10,17 +10,14 @@ Python >= 3.6.5, PyTorch == 1.0
 Cifar-10
 
 ## Hyperparameters
-Overall, I followed hyperparameters that were given in the paper.
+I followed hyperparameters that were given in the paper.
 
 However, there are several parameters that were not given in the paper.
 
 Ex) Softmax Temperature ($ \lambda_{0} $) , annealiation rate of the softmax temperature, parameters regarding the levels of resource constraints
-
-Specifically, I found that search validation accuracy is highly influenced by initial softmax temperature
 # Run the training code
 ```
 python main_constraint_new.py (WITH resource contraint)
-
 ```
 
 
@@ -38,7 +35,7 @@ Figure1 : Search Validation Accuracy
 <img src="./enas_train.png" alt="enas_train" width="40%">
 <img src="./enas_validation.png" alt="enas_validation" width="40%"></p>
 <p align="center">
-Figure1 : Search Validation Accuracy of ENAS
+Figure2 : Search Validation Accuracy of ENAS
 </p>
 
 ## Network Architecture (with resource constraint at epoch 120)
@@ -47,9 +44,9 @@ Figure1 : Search Validation Accuracy of ENAS
 <img src="./Reduction_Cell.png" alt="Reduction Cell" width="40%">
 </p>
 <p align="center">
-Figure2 : Network Architecture of normal cell (left) and reduction cell (right)
+Figure3 : Network Architecture of normal cell (left) and reduction cell (right)
 </p>
 
 
 ## Reference
-https://github.com/quark0/darts/blob/master/README.md
+https://github.com/quark0/darts/
