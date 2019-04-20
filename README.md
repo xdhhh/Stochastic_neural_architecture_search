@@ -52,6 +52,7 @@ Figure3 : Network Architecture of normal cell (left) and reduction cell (right)
 
 ## Evaluation results on cifar10
 |    Architecture    | Accuracy | Params |
+| ------ | ------ | ------ |
 | SNAS |  96.27% | 4.6M |
 | ENAS |  97.01% | 2.9M |
 
