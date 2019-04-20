@@ -17,9 +17,12 @@ However, there are several parameters that were not given in the paper.
 Ex) Softmax Temperature ($ \lambda_{0} $) , annealiation rate of the softmax temperature, parameters regarding the levels of resource constraints
 # Run the training code
 ```
-python main_constraint_new.py (WITH resource contraint)
+bash scripts/main_constraint_new.sh (WITH resource contraint)
 ```
-
+# Evaluation the searched architecture
+```
+bash scripts/retrain.sh (WITH resource contraint)
+```
 
 ## Search Validation Accuracy (with resource constraint)
 <p align="center">
@@ -47,6 +50,10 @@ Figure2 : Search Validation Accuracy of ENAS
 Figure3 : Network Architecture of normal cell (left) and reduction cell (right)
 </p>
 
+#Evaluation results on cifar10
+|    Architecture    | Accuracy | Params |
+| SNAS |  96.27% | 4.6M |
+| ENAS |  97.01% | 2.9M |
 
 ## Reference
 https://github.com/quark0/darts/
