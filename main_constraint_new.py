@@ -18,17 +18,12 @@ def train(train_queue,valid_queue, model, criterion, optimizer_arch, optimizer_m
     objs = utils.AvgrageMeter()
     top1 = utils.AvgrageMeter()
     top5 = utils.AvgrageMeter()
+    model.train()
     for step, (input, target) in enumerate(train_queue):
-        model.train()
         n = input.size(0) # batch size
 
         input = Variable(input , requires_grad = True).cuda()
         target = Variable(target, requires_grad=False).cuda(async=True)
-
-        input_search, target_search = next(iter(valid_queue))
-        input_search = Variable(input_search , requires_grad = True ).cuda()
-        target_search = Variable(target_search, requires_grad=False).cuda(async=True)
-
         temperature = args.initial_temp
 
         optimizer_arch.zero_grad()
@@ -107,9 +102,6 @@ train_transform, valid_transform = utils._data_transforms_cifar10(args)
 train_data = dset.CIFAR10(root='/home/xiaoda/data', train=True, download=False, transform=train_transform)
 valid_data = dset.CIFAR10(root='/home/xiaoda/data', train=False, download=False, transform=train_transform)
 writer = SummaryWriter(args.tensorboard_log)
-num_train = len(train_data)
-indices = list(range(num_train))
-split = int(np.floor(args.train_portion * num_train))
 if not os.path.exists(args.search_results_dir):
     os.mkdir(args.search_results_dir)
 train_queue = torch.utils.data.DataLoader(
