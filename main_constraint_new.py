@@ -70,7 +70,7 @@ parser.add_argument('--learning_rate', type=float, default=0.025, help='learning
 parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 parser.add_argument('--tem_decay', type=float, default=0.97, help='temperature decay ratio')
 parser.add_argument('--weight_decay', type=float, default=0.001, help='weight_decay')
-parser.add_argument('--epochs', type=int, default=125, help='epochs')
+parser.add_argument('--epochs', type=int, default=200, help='epochs')
 parser.add_argument('--init_channels', type=int, default=16, help='initial channels')
 parser.add_argument('--layers', type=int, default=8, help='layers')
 parser.add_argument('--cutout', action='store_true', default=True, help='use cutout')
@@ -92,7 +92,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = args.device_number
 device = torch.device('cuda')
 CIFAR_CLASSES = 10
 criterion = nn.CrossEntropyLoss().cuda()
-model = Network(args.init_channels, CIFAR_CLASSES, args.layers, criterion, temperature)
+model = Network(args.init_channels, CIFAR_CLASSES, args.layers, criterion)
 model.cuda()
 optimizer_model = torch.optim.SGD(model.parameters(),lr= 0.025,momentum = 0.9, weight_decay=3e-4)
 optimizer_arch = torch.optim.Adam(model.arch_parameters(),lr = 3e-4, betas=(0.5, 0.999), weight_decay = 1e-3)

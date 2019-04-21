@@ -14,7 +14,7 @@ I followed hyperparameters that were given in the paper.
 
 However, there are several parameters that were not given in the paper.
 
-Ex) Softmax Temperature ($ \lambda_{0} $) , annealiation rate of the softmax temperature, parameters regarding the levels of resource constraints
+Ex) Softmax Temperature , annealiation rate of the softmax temperature, parameters regarding the levels of resource constraints
 # Run the training code
 ```
 bash scripts/main_constraint_new.sh (WITH resource contraint)
@@ -53,8 +53,8 @@ Figure3 : Network Architecture of normal cell (left) and reduction cell (right)
 ## Evaluation results on cifar10
 |    Architecture    | Accuracy | Params |
 | ------ | ------ | ------ |
-| SNAS |  96.27% | 4.6M |
-| ENAS |  97.01% | 2.9M |
+| SNAS |  96.27% | 2.9M |
+| ENAS |  97.01% | 4.6M |
 
 ## Reference
 https://github.com/quark0/darts/
