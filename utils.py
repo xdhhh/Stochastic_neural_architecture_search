@@ -62,6 +62,10 @@ class Cutout(object):
         img *= mask
         return img
 
+def decay_temperature(temperature, tem_decay):
+    temp = temperature * tem_decay
+    return temp
+
 def drop_path(x, drop_prob):
   if drop_prob > 0.:
     keep_prob = 1.-drop_prob

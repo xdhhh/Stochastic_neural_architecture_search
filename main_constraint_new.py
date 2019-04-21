@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from tensorboardX import SummaryWriter
 import argparse
 
-def train(train_queue,valid_queue, model, criterion, optimizer_arch, optimizer_model,lr_arch, lr_model):
+def train(train_queue,valid_queue, model, criterion, optimizer_arch, optimizer_model,lr_arch, lr_model, temperature):
     objs = utils.AvgrageMeter()
     top1 = utils.AvgrageMeter()
     top5 = utils.AvgrageMeter()
@@ -24,11 +24,10 @@ def train(train_queue,valid_queue, model, criterion, optimizer_arch, optimizer_m
 
         input = Variable(input , requires_grad = True).cuda()
         target = Variable(target, requires_grad=False).cuda(async=True)
-        temperature = args.initial_temp
 
         optimizer_arch.zero_grad()
         optimizer_model.zero_grad()
-        logit,cost= model(input , temperature)## model inputs
+        logit,cost= model(input, temperature)## model inputs
         value_loss = criterion(logit , target)
         total_loss = value_loss + Variable(cost*(1e-9)).cuda()
         total_loss.backward()
@@ -43,7 +42,7 @@ def train(train_queue,valid_queue, model, criterion, optimizer_arch, optimizer_m
     return top1.avg, top5.avg, objs.avg
 
 
-def infer(valid_queue, model, criterion):
+def infer(valid_queue, model, criterion, temperature):
     objs = utils.AvgrageMeter()
     top1 = utils.AvgrageMeter()
     top5 = utils.AvgrageMeter()
@@ -53,7 +52,6 @@ def infer(valid_queue, model, criterion):
         input = Variable(input, volatile=True).cuda()
         target = Variable(target, volatile=True).cuda(async=True)
 
-        temperature = args.initial_temp
         logits ,cost = model(input , temperature)
         loss = criterion(logits, target)
         prec1, prec5 = utils.accuracy(logits, target, topk=(1, 5))
@@ -70,6 +68,7 @@ parser.add_argument('--search_results_dir', type=str, default='search_results', 
 parser.add_argument('--batch_size', type=int, default=32, help='batch size')
 parser.add_argument('--learning_rate', type=float, default=0.025, help='learning rate')
 parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
+parser.add_argument('--tem_decay', type=float, default=0.97, help='temperature decay ratio')
 parser.add_argument('--weight_decay', type=float, default=0.001, help='weight_decay')
 parser.add_argument('--epochs', type=int, default=125, help='epochs')
 parser.add_argument('--init_channels', type=int, default=16, help='initial channels')
@@ -93,7 +92,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = args.device_number
 device = torch.device('cuda')
 CIFAR_CLASSES = 10
 criterion = nn.CrossEntropyLoss().cuda()
-model = Network(args.init_channels, CIFAR_CLASSES, args.layers, criterion)
+model = Network(args.init_channels, CIFAR_CLASSES, args.layers, criterion, temperature)
 model.cuda()
 optimizer_model = torch.optim.SGD(model.parameters(),lr= 0.025,momentum = 0.9, weight_decay=3e-4)
 optimizer_arch = torch.optim.Adam(model.arch_parameters(),lr = 3e-4, betas=(0.5, 0.999), weight_decay = 1e-3)
@@ -109,13 +108,16 @@ train_queue = torch.utils.data.DataLoader(
 
 valid_queue = torch.utils.data.DataLoader(
   valid_data, batch_size=args.batch_size, shuffle = False)
+
+temperature = args.initial_temp
+
 for epoch in range(args.epochs):
     print("Start to train for epoch %d" % (epoch))
-    train_acc_top1, train_acc_top5 , train_valoss = train(train_queue, valid_queue, model,criterion, optimizer_arch,optimizer_model, 3e-4,0.025)
+    train_acc_top1, train_acc_top5 , train_valoss = train(train_queue, valid_queue, model,criterion, optimizer_arch,optimizer_model, 3e-4,0.025, temperature)
     w_sche.step()
     print("Start to validate for epoch %d" % (epoch))
-    valid_acc_top1,valid_acc_top5, valid_valoss = infer(valid_queue, model, criterion)
-
+    valid_acc_top1,valid_acc_top5, valid_valoss = infer(valid_queue, model, criterion, temperature)
+    temperature = utils.decay_temperature(temperature, args.tem_decay)
     writer.add_scalar('Train/train_acc_top1', train_acc_top1, epoch)
     writer.add_scalar('Train/train_acc_top5', train_acc_top5, epoch)
     writer.add_scalar('Train/train_valoss', train_valoss, epoch)
